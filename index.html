@@ -15,7 +15,6 @@
             margin: 0;
         }
 
-        /* Pantalla de presentación automática */
         #welcome-screen {
             position: fixed;
             inset: 0;
@@ -42,17 +41,12 @@
             50% { transform: scale(1.1); opacity: 0.9; }
         }
 
-        .fade-out {
-            opacity: 0;
-            visibility: hidden;
-        }
+        .fade-out { opacity: 0; visibility: hidden; }
 
-        /* Card de Hamburguesa */
         .burger-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
         }
 
         .burger-image {
@@ -64,44 +58,40 @@
             background-color: #1e293b;
         }
 
-        /* Animación para el precio flotante */
         @keyframes floatBadge {
             0% { transform: rotate(3deg) translateY(0px); }
             50% { transform: rotate(-2deg) translateY(-10px); }
             100% { transform: rotate(3deg) translateY(0px); }
         }
 
-        .price-badge {
-            animation: floatBadge 3s infinite ease-in-out;
-        }
+        .price-badge { animation: floatBadge 3s infinite ease-in-out; }
 
-        /* Checkboxes */
         .option-checkbox {
             appearance: none;
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border: 2px solid #f59e0b;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             position: relative;
             transition: all 0.3s;
         }
 
-        .option-checkbox:checked {
-            background-color: #f59e0b;
-            transform: scale(1.1);
-        }
-
+        .option-checkbox:checked { background-color: #f59e0b; }
         .option-checkbox:checked::after {
             content: '✓';
             position: absolute;
             color: white;
             font-weight: bold;
-            left: 6px;
-            top: 0px;
+            left: 4px; top: -2px;
         }
 
-        /* Efecto de Emojis flotantes */
+        .option-checkbox:disabled {
+            border-color: #475569;
+            background-color: #1e293b;
+            cursor: not-allowed;
+        }
+
         .floating-emoji {
             position: absolute;
             font-size: 3.5rem;
@@ -121,10 +111,32 @@
             box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
         }
 
-        .badge-delivery {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.4);
+        .coming-soon {
+            background: repeating-linear-gradient(45deg, #fbbf24, #fbbf24 10px, #f59e0b 10px, #f59e0b 20px);
+            color: #000;
+            font-weight: 900;
+            text-align: center;
+            padding: 8px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .out-of-stock {
+            opacity: 0.5;
+            filter: grayscale(1);
+            pointer-events: none;
+        }
+
+        #admin-panel {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.98);
+            z-index: 200;
+            display: none;
+            overflow-y: auto;
+            padding: 20px;
         }
     </style>
 </head>
@@ -140,109 +152,247 @@
         </div>
     </div>
 
+    <!-- Panel de Administración -->
+    <div id="admin-panel">
+        <div class="max-w-md mx-auto py-10">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-amber-500">Panel de Control</h2>
+                <button onclick="closeAdmin()" class="text-white bg-red-500 px-4 py-2 rounded-xl text-xs font-bold">CERRAR</button>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <p class="text-sm font-bold mb-3">Configuración General</p>
+                    <label class="block text-xs text-gray-400 mb-1">Precio Base ($)</label>
+                    <input type="number" id="admin-base-price" step="0.5" class="w-full bg-slate-800 p-3 rounded-xl mb-4 text-white">
+                    
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="admin-show-promo" class="option-checkbox">
+                        <span class="text-sm">Mostrar anuncio "Próximamente"</span>
+                    </label>
+                </div>
+
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <p class="text-sm font-bold mb-3">Disponibilidad de Productos</p>
+                    <div class="space-y-3" id="admin-inventory-list">
+                    </div>
+                </div>
+                
+                <button onclick="saveAdminChanges()" class="w-full bg-amber-500 py-4 rounded-2xl font-black text-slate-900 shadow-xl">
+                    GUARDAR CAMBIOS
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Contenido Principal -->
     <main class="max-w-md mx-auto px-5 pt-10 pb-24 opacity-0 transition-opacity duration-1000" id="main-content">
         
         <header class="text-center mb-8">
-            <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
+            <h2 ondblclick="askAdminPass()" class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 cursor-pointer select-none">
                 Brasilia 2 Burgers
             </h2>
-            <div class="mt-2 inline-flex items-center gap-2 px-4 py-1 rounded-full badge-delivery text-xs font-bold uppercase tracking-wider">
+            <div class="mt-2 inline-flex items-center gap-2 px-4 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-bold uppercase tracking-wider">
                 <span>🛵 Entrega gratis en el conjunto</span>
             </div>
         </header>
 
-        <!-- Card Principal -->
         <div class="burger-card p-5 rounded-[2.5rem] shadow-2xl overflow-hidden" id="card-container">
             <div class="relative">
-                <img id="main-burger-img" src="hamburguesa1.jpg" alt="[Image of Mi Hamburguesa]" class="burger-image mb-6">
-                
-                <div class="price-badge absolute bottom-10 right-4 bg-amber-500 text-white font-black px-4 py-2 rounded-2xl shadow-lg">
+                <img id="main-burger-img" src="hamburguesa1.jpg" alt="[Imagen de Mi Hamburguesa]" class="burger-image mb-6">
+                <div class="price-badge absolute bottom-10 right-4 bg-amber-500 text-white font-black px-4 py-2 rounded-2xl shadow-lg" id="ui-base-price-badge">
                     $3.00
                 </div>
             </div>
             
             <div class="mb-4">
-                <h3 class="text-2xl font-bold">La Especial</h3>
-                <p class="text-gray-400 text-sm leading-relaxed mt-1">
-                    Carne artesanal, queso fundido y vegetales frescos. Directo a tu casa en Brasilia 2.
+                <h3 class="text-2xl font-bold text-center">La Especial</h3>
+                <p class="text-gray-400 text-sm text-center leading-relaxed mt-1">
+                    Carne artesanal, pan suave y el sabor de Brasilia 2.
                 </p>
             </div>
 
-            <!-- Opciones con Efectos -->
-            <div class="space-y-3">
-                <p class="text-xs font-bold text-amber-500 uppercase tracking-widest ml-1 text-center">Personaliza tu sabor</p>
+            <div id="promo-banner" class="coming-soon">
+                ⚠️ PRÓXIMAMENTE: PAPAS FRITAS NATURALES 🍟
+            </div>
+
+            <!-- SALSAS Y VEGETALES -->
+            <div class="bg-white/5 rounded-2xl p-4 mb-4 border border-white/5">
+                <p class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-3">Personaliza (Gratis)</p>
                 
-                <label class="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 cursor-pointer active:scale-95 transition">
-                    <div class="flex items-center gap-4">
-                        <input type="checkbox" class="option-checkbox" id="extra-huevo" onchange="handleOptionChange(this, '🍳')">
-                        <span class="font-medium">Huevo Frito</span>
+                <div class="mb-4 border-b border-white/10 pb-3">
+                    <p class="text-[10px] text-gray-500 uppercase mb-2">Ingredientes:</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="option-checkbox sauce-option" value="Queso" checked> Queso 🧀</label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="option-checkbox sauce-option" value="Tomate" checked> Tomate 🍅</label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="option-checkbox sauce-option" value="Lechuga" checked> Lechuga 🥬</label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="option-checkbox sauce-option" value="Ají"> ¡Ají! 🌶️</label>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-[10px] text-gray-500 uppercase mb-2">Salsas:</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="option-checkbox condiment-option" value="Mayonesa" checked> Mayonesa ⚪</label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="option-checkbox condiment-option" value="Mostaza" checked> Mostaza 🟡</label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="option-checkbox condiment-option" value="Salsa de Tomate" checked> S. Tomate 🔴</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXTRAS -->
+            <div class="space-y-2 mb-6" id="extras-container">
+                <p class="text-xs font-bold text-amber-500 uppercase tracking-widest ml-1">Potencia tu pedido</p>
+                
+                <label data-id="combo" class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer active:scale-95 transition">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" class="option-checkbox extra-cost" data-price="1.0" id="extra-combo" onchange="handleOptionChange(this, '🍟')">
+                        <div class="flex flex-col"><span class="text-sm font-bold">Papas de snack + Cola</span><span class="text-[10px] text-gray-400">Papas de funda</span></div>
                     </div>
                     <span class="text-amber-400 font-bold">+$1.00</span>
                 </label>
 
-                <label class="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 cursor-pointer active:scale-95 transition">
-                    <div class="flex items-center gap-4">
-                        <input type="checkbox" class="option-checkbox" id="extra-combo" onchange="handleOptionChange(this, '🍟🥤')">
-                        <span class="font-medium">Papas y Cola</span>
+                <label data-id="huevo" class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer active:scale-95 transition">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" class="option-checkbox extra-cost" data-price="1.0" id="extra-huevo" onchange="handleOptionChange(this, '🍳')">
+                        <span class="text-sm font-bold">Huevo Frito</span>
                     </div>
                     <span class="text-amber-400 font-bold">+$1.00</span>
+                </label>
+
+                <label data-id="tocino" class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer active:scale-95 transition">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" class="option-checkbox extra-cost" data-price="1.0" id="extra-tocino" onchange="handleOptionChange(this, '🥓')">
+                        <span class="text-sm font-bold">Tocino Crujiente</span>
+                    </div>
+                    <span class="text-amber-400 font-bold">+$1.00</span>
+                </label>
+
+                <label data-id="carne" class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer active:scale-95 transition">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" class="option-checkbox extra-cost" data-price="2.0" id="extra-carne" onchange="handleOptionChange(this, '🥩')">
+                        <span class="text-sm font-bold">Otra Carne (Doble)</span>
+                    </div>
+                    <span class="text-amber-400 font-bold">+$2.00</span>
                 </label>
             </div>
 
-            <!-- Datos de Entrega -->
-            <div class="mt-8 space-y-3">
-                <input type="text" id="casa" placeholder="Número de Casa (Ej: 45)" class="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-amber-500 transition placeholder:text-gray-500">
-                <input type="text" id="nombre" placeholder="Tu Nombre" class="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-amber-500 transition placeholder:text-gray-500">
+            <!-- Datos de Entrega y Comentarios -->
+            <div class="mt-4 space-y-3">
+                <div class="flex gap-2">
+                    <input type="text" id="casa" placeholder="Casa" class="w-1/3 bg-white/10 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-amber-500 transition placeholder:text-gray-500">
+                    <input type="text" id="nombre" placeholder="Tu Nombre" class="w-2/3 bg-white/10 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-amber-500 transition placeholder:text-gray-500">
+                </div>
+                <textarea id="notas" placeholder="¿Algo más? (Ej: Sin cebolla, dejar en recepción...)" class="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-amber-500 transition placeholder:text-gray-500 resize-none h-24 text-sm"></textarea>
             </div>
 
             <!-- Total y Pedido -->
-            <div class="mt-10">
+            <div class="mt-8">
                 <div class="flex justify-between items-end mb-6 px-2">
-                    <span class="text-gray-400 text-sm">Total del pedido</span>
+                    <span class="text-gray-400 text-sm font-bold">TOTAL</span>
                     <span class="text-4xl font-black text-white" id="total-display">$3.00</span>
                 </div>
                 
                 <button onclick="sendOrder()" class="btn-order w-full py-5 rounded-2xl font-black text-white text-lg flex justify-center items-center gap-3 transition hover:brightness-110 active:scale-95">
-                    HACER PEDIDO
+                    ENVIAR PEDIDO
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.129l-.694 2.482 2.541-.67c.819.514 1.748.814 2.896.815h.003c3.181 0 5.767-2.586 5.768-5.766 0-3.18-2.586-5.766-5.767-5.766zm3.366 8.283c-.141.397-.714.733-1.018.778-.276.04-.636.069-1.025-.058-.232-.076-.521-.18-.895-.345-1.583-.7-2.593-2.292-2.671-2.396-.079-.104-.633-.84-.633-1.602 0-.761.397-1.135.538-1.291.141-.155.308-.194.411-.194.103 0 .205.001.294.006.095.005.223-.036.35.269.141.341.482 1.173.523 1.259.041.085.068.185.011.299-.057.114-.085.185-.17.284-.085.101-.178.224-.253.3-.089.09-.181.189-.077.368.103.179.46.759.986 1.23.678.605 1.25.793 1.428.882.179.089.284.074.39-.047.106-.121.455-.53.576-.711.121-.181.242-.152.409-.091.168.061 1.066.503 1.251.594.185.091.308.136.353.213.045.078.045.452-.096.849z"/></svg>
                 </button>
             </div>
         </div>
-
-        <p class="mt-8 text-center text-gray-600 text-[10px] uppercase tracking-widest font-bold">
-            Exclusivo Brasilia 2
-        </p>
-
     </main>
 
     <script>
-        const BASE_PRICE = 3.0;
-        let total = BASE_PRICE;
+        // CONFIGURACIÓN INICIAL
+        const ADMIN_PASS = "admin123";
+        let appState = {
+            basePrice: 3.0,
+            showPromo: true,
+            inventory: {
+                combo: { label: "Papas Snack + Cola", available: true },
+                huevo: { label: "Huevo Frito", available: true },
+                tocino: { label: "Tocino", available: true },
+                carne: { label: "Otra Carne", available: true }
+            }
+        };
 
-        // Intentar arreglar extensión de imagen automáticamente
+        const saved = localStorage.getItem('brasilia_burgers_state');
+        if (saved) appState = JSON.parse(saved);
+
         window.addEventListener('load', () => {
+            applyAppState();
             const img = document.getElementById('main-burger-img');
-            
-            img.onerror = function() {
-                if (this.src.endsWith('.jpg')) {
-                    this.src = 'hamburguesa1.jpeg';
-                }
-            };
-
+            img.onerror = function() { if (this.src.endsWith('.jpg')) this.src = 'hamburguesa1.jpeg'; };
             setTimeout(() => {
                 const welcome = document.getElementById('welcome-screen');
                 welcome.classList.add('fade-out');
                 document.getElementById('main-content').classList.remove('opacity-0');
                 setTimeout(() => welcome.style.display = 'none', 1000);
-            }, 2500);
+            }, 2000);
         });
+
+        function applyAppState() {
+            document.getElementById('ui-base-price-badge').innerText = `$${appState.basePrice.toFixed(2)}`;
+            document.getElementById('promo-banner').style.display = appState.showPromo ? 'block' : 'none';
+            
+            for (const [id, data] of Object.entries(appState.inventory)) {
+                const row = document.querySelector(`[data-id="${id}"]`);
+                if (row) {
+                    if (data.available) {
+                        row.classList.remove('out-of-stock');
+                    } else {
+                        row.classList.add('out-of-stock');
+                        row.querySelector('input').checked = false;
+                    }
+                }
+            }
+            updateTotal();
+        }
+
+        function askAdminPass() {
+            const p = prompt("Contraseña de Administrador:");
+            if (p === ADMIN_PASS) {
+                openAdmin();
+            } else if (p !== null) {
+                alert("Contraseña incorrecta");
+            }
+        }
+
+        function openAdmin() {
+            document.getElementById('admin-base-price').value = appState.basePrice;
+            document.getElementById('admin-show-promo').checked = appState.showPromo;
+            
+            const list = document.getElementById('admin-inventory-list');
+            list.innerHTML = '';
+            for (const [id, data] of Object.entries(appState.inventory)) {
+                list.innerHTML += `
+                    <label class="flex items-center justify-between p-2 bg-slate-800 rounded-xl">
+                        <span class="text-sm">${data.label}</span>
+                        <input type="checkbox" class="admin-inv-check" data-id="${id}" ${data.available ? 'checked' : ''}>
+                    </label>
+                `;
+            }
+            document.getElementById('admin-panel').style.display = 'block';
+        }
+
+        function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
+
+        function saveAdminChanges() {
+            appState.basePrice = parseFloat(document.getElementById('admin-base-price').value);
+            appState.showPromo = document.getElementById('admin-show-promo').checked;
+            
+            document.querySelectorAll('.admin-inv-check').forEach(check => {
+                const id = check.dataset.id;
+                appState.inventory[id].available = check.checked;
+            });
+
+            localStorage.setItem('brasilia_burgers_state', JSON.stringify(appState));
+            applyAppState();
+            closeAdmin();
+        }
 
         function handleOptionChange(checkbox, emoji) {
             updateTotal();
-            if (checkbox.checked) {
-                createFloatingEmoji(emoji);
-            }
+            if (checkbox.checked) createFloatingEmoji(emoji);
         }
 
         function createFloatingEmoji(emoji) {
@@ -258,48 +408,53 @@
         }
 
         function updateTotal() {
-            let currentTotal = BASE_PRICE;
-            if (document.getElementById('extra-huevo').checked) currentTotal += 1.0;
-            if (document.getElementById('extra-combo').checked) currentTotal += 1.0;
-            
-            total = currentTotal;
-            const display = document.getElementById('total-display');
-            display.innerText = `$${total.toFixed(2)}`;
-            
-            display.animate([
-                { transform: 'scale(1)', color: '#fff' },
-                { transform: 'scale(1.3)', color: '#fbbf24' },
-                { transform: 'scale(1)', color: '#fff' }
-            ], { duration: 300 });
+            let total = appState.basePrice;
+            document.querySelectorAll('.extra-cost:checked').forEach(extra => {
+                total += parseFloat(extra.dataset.price);
+            });
+            document.getElementById('total-display').innerText = `$${total.toFixed(2)}`;
         }
 
         function sendOrder() {
             const casa = document.getElementById('casa').value.trim();
             const nombre = document.getElementById('nombre').value.trim();
+            const notas = document.getElementById('notas').value.trim();
             
             if (!casa || !nombre) {
-                alert("Por favor completa tu nombre y número de casa.");
+                alert("Completa tu nombre y número de casa.");
                 return;
             }
 
-            const huevo = document.getElementById('extra-huevo').checked ? "✅ Con Huevo Frito 🍳" : "❌ Sin Huevo";
-            const combo = document.getElementById('extra-combo').checked ? "✅ Con Papas y Cola 🍟🥤" : "❌ Solo Hamburguesa";
+            const salsasArr = [];
+            document.querySelectorAll('.sauce-option:checked').forEach(s => salsasArr.push(s.value));
+            const salsasTexto = salsasArr.length > 0 ? salsasArr.join(", ") : "Sin vegetales/queso";
+
+            const condimentosArr = [];
+            document.querySelectorAll('.condiment-option:checked').forEach(c => condimentosArr.push(c.value));
+            const condimentosTexto = condimentosArr.length > 0 ? condimentosArr.join(", ") : "Sin salsas";
+
+            let extrasTexto = "";
+            document.querySelectorAll('.extra-cost:checked').forEach(e => {
+                extrasTexto += `- ${e.parentElement.innerText.split('\n')[0]}%0A`;
+            });
+            if (extrasTexto === "") extrasTexto = "- Sin extras%0A";
 
             const message = `*NUEVO PEDIDO - BRASILIA 2*%0A%0A` +
                             `*Cliente:* ${nombre}%0A` +
                             `*Casa:* ${casa}%0A` +
                             `--------------------------%0A` +
-                            `*Producto:* 1 Hamburguesa Especial 🍔%0A` +
-                            `*Extras:*%0A` +
-                            `- ${huevo}%0A` +
-                            `- ${combo}%0A` +
+                            `*Ingredientes:* ${salsasTexto}%0A` +
+                            `*Salsas:* ${condimentosTexto}%0A` +
                             `--------------------------%0A` +
-                            `*TOTAL:* $${total.toFixed(2)}%0A` +
+                            `*Extras:*%0A${extrasTexto}` +
+                            `--------------------------%0A` +
+                            `*Notas:* ${notas || "Sin instrucciones adicionales"}%0A` +
+                            `--------------------------%0A` +
+                            `*TOTAL:* ${document.getElementById('total-display').innerText}%0A` +
                             `*Envío:* GRATIS%0A%0A` +
-                            `¡Gracias!`;
+                            `¡Prepare mi pedido por favor!`;
 
-            const myNumber = "593939406913"; 
-            window.location.href = `https://wa.me/${myNumber}?text=${message}`;
+            window.location.href = `https://wa.me/593939406913?text=${message}`;
         }
     </script>
 </body>
