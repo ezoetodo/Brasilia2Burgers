@@ -16,6 +16,12 @@
             touch-action: manipulation;
         }
 
+        /* Bloqueo de scroll cuando hay paneles abiertos */
+        .stop-scroll {
+            overflow: hidden !important;
+            height: 100vh;
+        }
+
         /* Banner Superior */
         .delivery-banner {
             background: rgba(245, 158, 11, 0.1);
@@ -46,10 +52,10 @@
             font-weight: 800;
             color: white;
             text-shadow: 2px 4px 12px rgba(0,0,0,0.3);
-            animation: pulse 1.5s infinite ease-in-out;
+            animation: pulseWelcome 1.5s infinite ease-in-out;
         }
 
-        @keyframes pulse {
+        @keyframes pulseWelcome {
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.9; }
         }
@@ -70,7 +76,6 @@
             background: #1e293b;
         }
 
-        /* Efecto Flotante del Precio Base */
         .floating-badge {
             animation: floatContinuous 3s ease-in-out infinite;
             box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.5);
@@ -79,6 +84,19 @@
         @keyframes floatContinuous {
             0%, 100% { transform: translateY(0px) rotate(-2deg); }
             50% { transform: translateY(-12px) rotate(3deg); }
+        }
+
+        /* Animación para la papa próximamente */
+        .pulsing-emoji {
+            display: inline-block;
+            animation: emojiPulse 2s infinite ease-in-out;
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+        }
+
+        @keyframes emojiPulse {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.4); filter: brightness(1.5); }
+            100% { transform: scale(1); filter: brightness(1); }
         }
 
         .option-checkbox {
@@ -153,30 +171,43 @@
         <p class="text-white/80 font-medium mt-2">Sabor Casero</p>
     </div>
 
+    <!-- Panel del Carrito -->
     <div id="cart-panel">
         <div class="max-w-md mx-auto py-10">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-black text-white">Tu Pedido</h2>
+                <h2 class="text-2xl font-black text-white">Tu Pedido 🛒</h2>
                 <button onclick="toggleCart()" class="text-gray-400 bg-white/10 px-4 py-2 rounded-xl">Cerrar</button>
             </div>
+            
             <div id="cart-items" class="space-y-4 mb-8"></div>
-            <div class="border-t border-white/10 pt-6 text-center">
-                <span class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Total a Pagar</span>
-                <div class="text-4xl font-black text-white mt-1 mb-8" id="cart-total-display">$0.00</div>
-                
-                <div class="space-y-3 mb-6">
+            
+            <div class="border-t border-white/10 pt-6">
+                <div class="mb-6 space-y-4">
+                    <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest">Información de Entrega</p>
                     <div class="flex gap-2">
                         <input type="text" id="casa" placeholder="Casa #" class="w-1/3 bg-white/10 border border-white/10 rounded-2xl px-4 py-4 text-white outline-none focus:border-amber-500">
                         <input type="text" id="nombre" placeholder="Tu Nombre" class="w-2/3 bg-white/10 border border-white/10 rounded-2xl px-4 py-4 text-white outline-none focus:border-amber-500">
                     </div>
+                    
+                    <div>
+                        <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">Comentario Extra 📝</p>
+                        <textarea id="notas" placeholder="Ej: Sin salsas, tocar la puerta..." class="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-4 text-white outline-none focus:border-amber-500 h-24 resize-none text-sm"></textarea>
+                    </div>
                 </div>
-                <button onclick="sendOrder()" class="btn-whatsapp w-full py-5 rounded-2xl font-black text-white">
-                    CONFIRMAR POR WHATSAPP 🍔
-                </button>
+
+                <div class="text-center">
+                    <span class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Total a Pagar</span>
+                    <div class="text-4xl font-black text-white mt-1 mb-8" id="cart-total-display">$0.00</div>
+                    
+                    <button onclick="sendOrder()" class="btn-whatsapp w-full py-5 rounded-2xl font-black text-white text-lg shadow-xl active:scale-95 transition">
+                        PEDIR POR WHATSAPP ✅
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Panel Admin -->
     <div id="admin-panel">
         <div class="max-w-md mx-auto py-10">
             <h2 class="text-2xl font-bold text-amber-500 mb-6">Administración</h2>
@@ -192,6 +223,7 @@
         </div>
     </div>
 
+    <!-- Botón Flotante Carrito -->
     <div class="fixed bottom-6 right-6 z-50">
         <button onclick="toggleCart()" class="bg-amber-500 p-4 rounded-full shadow-2xl relative active:scale-95 transition">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,6 +239,7 @@
             <p class="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-1">Sabor Casero</p>
         </header>
 
+        <!-- Card de Hamburguesa -->
         <div class="burger-card p-5 rounded-[2.5rem] shadow-2xl relative">
             <div class="relative mb-8">
                 <img src="hamburguesa1.jpg" alt="Hamburguesa Especial" class="burger-image shadow-2xl">
@@ -282,11 +315,11 @@
             </div>
         </div>
 
-        <div class="mt-12 text-center pb-12">
+        <footer class="mt-12 text-center pb-12">
             <p class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">
-                Próximamente: Papas fritas naturales 🥔
+                Próximamente: Papas fritas naturales <span class="pulsing-emoji">🥔</span>
             </p>
-        </div>
+        </footer>
     </main>
 
     <script type="module">
@@ -310,6 +343,7 @@
 
         function renderUI() {
             const container = document.getElementById('extras-container');
+            if(!container) return;
             container.innerHTML = '';
             appState.inventory.forEach(extra => {
                 if(!extra.available) return;
@@ -359,7 +393,8 @@
             cart.push({
                 name: "Hamburguesa Especial",
                 total: parseFloat(document.getElementById('total-display').innerText.replace('$','')),
-                details: `Base: ${baseIngredients.join(', ')} | Salsas: ${condiments.join(', ')}`,
+                ingredientes: baseIngredients,
+                salsas: condiments,
                 extras: extras
             });
             
@@ -381,7 +416,8 @@
                             <span>${item.name}</span>
                             <span>$${item.total.toFixed(2)}</span>
                         </div>
-                        <p class="text-[9px] text-gray-400 mt-1">${item.details}</p>
+                        <p class="text-[9px] text-gray-400 mt-1">Base: ${item.ingredientes.join(', ')}</p>
+                        <p class="text-[9px] text-gray-400">Salsas: ${item.salsas.join(', ')}</p>
                         ${item.extras.length > 0 ? `<p class="text-[9px] text-amber-500 mt-1 font-bold">+ ${item.extras.join(', ')}</p>` : ''}
                         <button onclick="remove(${i})" class="text-[9px] text-red-400 mt-2 uppercase font-bold tracking-widest">Eliminar</button>
                     </div>`;
@@ -390,18 +426,67 @@
         }
 
         window.remove = (i) => { cart.splice(i, 1); renderCart(); document.getElementById('cart-count').innerText = cart.length; };
-        window.toggleCart = () => { const p = document.getElementById('cart-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; };
         
-        window.askAdminPass = () => { if(prompt("Pass:") === "B2") document.getElementById('admin-panel').style.display='block'; };
-        window.closeAdmin = () => document.getElementById('admin-panel').style.display='none';
+        window.toggleCart = () => { 
+            const p = document.getElementById('cart-panel'); 
+            const isOpen = p.style.display === 'block';
+            p.style.display = isOpen ? 'none' : 'block';
+            
+            // Bloquear scroll
+            if (!isOpen) {
+                document.body.classList.add('stop-scroll');
+            } else {
+                document.body.classList.remove('stop-scroll');
+            }
+        };
+        
+        window.askAdminPass = () => { 
+            if(prompt("Pass:") === "B2") {
+                document.getElementById('admin-panel').style.display='block';
+                document.body.classList.add('stop-scroll');
+            }
+        };
+        
+        window.closeAdmin = () => {
+            document.getElementById('admin-panel').style.display='none';
+            document.body.classList.remove('stop-scroll');
+        };
 
         window.sendOrder = () => {
             const c = document.getElementById('casa').value;
             const n = document.getElementById('nombre').value;
-            if(!c || !n) return alert("Faltan datos");
-            let msg = `*BRASILIA 2*%0A*Cliente:* ${n} (Casa ${c})%0A%0A`;
-            cart.forEach(i => msg += `*1x ${i.name}* ($${i.total.toFixed(2)})%0A- ${i.details}%0A  Extras: ${i.extras.join(', ') || 'Ninguno'}%0A%0A`);
-            msg += `*TOTAL: ${document.getElementById('cart-total-display').innerText}*`;
+            const notas = document.getElementById('notas').value;
+            
+            if(!c || !n) return alert("Por favor, ingresa tu Nombre y Número de Casa");
+            if(cart.length === 0) return alert("El carrito está vacío");
+
+            let msg = `🍔 *NUEVO PEDIDO - BRASILIA 2*%0A`;
+            msg += `*Nombre:* ${n}%0A`;
+            msg += `*Casa:* ${c}%0A%0A`;
+            msg += `Me gustaría una especial con:%0A`;
+            msg += `-------------------------------%0A`;
+
+            cart.forEach(item => {
+                msg += `*${item.name}*%0A`;
+                msg += `*Ingredientes:* ${item.ingredientes.join(', ') || 'Sin vegetales'}%0A`;
+                msg += `*Salsas:* ${item.salsas.join(', ') || 'Sin salsas'}%0A`;
+                msg += `-------------------------------%0A`;
+                msg += `*Extras:*%0A`;
+                if(item.extras.length > 0) {
+                    item.extras.forEach(ex => msg += `- ${ex}%0A`);
+                } else {
+                    msg += `- Sin extras%0A`;
+                }
+                msg += `-------------------------------%0A`;
+            });
+
+            msg += `*Notas:*%0A${notas || 'Sin comentarios adicionales.'}%0A`;
+            msg += `-------------------------------%0A`;
+            msg += `*Envío:* Gratis.%0A`;
+            msg += `*TOTAL: ${document.getElementById('cart-total-display').innerText}*%0A`;
+            msg += `-------------------------------%0A`;
+            msg += `_¡Muchas gracias!_`;
+
             window.location.href = `https://wa.me/593939406913?text=${msg}`;
         };
 
