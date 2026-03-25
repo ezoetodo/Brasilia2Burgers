@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brasilia 2 - Hamburguesas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+            margin: 0;
+            touch-action: manipulation;
+        }
+
+        /* Banner Superior */
+        .delivery-banner {
+            background: rgba(245, 158, 11, 0.1);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: center;
+            padding: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #welcome-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 1s ease-out, visibility 1s;
+        }
+
+        .welcome-text {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 2px 4px 12px rgba(0,0,0,0.3);
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.9; }
+        }
+
+        .fade-out { opacity: 0; visibility: hidden; }
+
+        .burger-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .burger-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 1.5rem;
+            background: #1e293b;
+        }
+
+        /* Efecto Flotante del Precio Base */
+        .floating-badge {
+            animation: floatContinuous 3s ease-in-out infinite;
+            box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.5);
+        }
+
+        @keyframes floatContinuous {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-12px) rotate(3deg); }
+        }
+
+        .option-checkbox {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid #f59e0b;
+            border-radius: 6px;
+            position: relative;
+            transition: all 0.2s;
+            pointer-events: none;
+        }
+
+        .option-checkbox:checked { background-color: #f59e0b; }
+        .option-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            left: 3px; top: -3px;
+            font-size: 14px;
+        }
+
+        .floating-emoji {
+            position: fixed;
+            font-size: 2.5rem;
+            pointer-events: none;
+            z-index: 1000;
+            animation: floatAndFade 0.8s ease-out forwards;
+        }
+
+        @keyframes floatAndFade {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translate(-50%, -150px) scale(1.4); opacity: 0; }
+        }
+
+        .btn-primary { background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); }
+        .btn-whatsapp { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 999px;
+        }
+
+        #admin-panel, #cart-panel {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.98);
+            z-index: 200;
+            display: none;
+            overflow-y: auto;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-32">
+
+    <div class="delivery-banner">
+        Entrega gratis en el conjunto 🏠
+    </div>
+
+    <div id="welcome-screen">
+        <h1 class="welcome-text text-center">Brasilia 2</h1>
+        <p class="text-white/80 font-medium mt-2">Sabor Casero</p>
+    </div>
+
+    <div id="cart-panel">
+        <div class="max-w-md mx-auto py-10">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black text-white">Tu Pedido</h2>
+                <button onclick="toggleCart()" class="text-gray-400 bg-white/10 px-4 py-2 rounded-xl">Cerrar</button>
+            </div>
+            <div id="cart-items" class="space-y-4 mb-8"></div>
+            <div class="border-t border-white/10 pt-6 text-center">
+                <span class="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Total a Pagar</span>
+                <div class="text-4xl font-black text-white mt-1 mb-8" id="cart-total-display">$0.00</div>
+                
+                <div class="space-y-3 mb-6">
+                    <div class="flex gap-2">
+                        <input type="text" id="casa" placeholder="Casa #" class="w-1/3 bg-white/10 border border-white/10 rounded-2xl px-4 py-4 text-white outline-none focus:border-amber-500">
+                        <input type="text" id="nombre" placeholder="Tu Nombre" class="w-2/3 bg-white/10 border border-white/10 rounded-2xl px-4 py-4 text-white outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <button onclick="sendOrder()" class="btn-whatsapp w-full py-5 rounded-2xl font-black text-white">
+                    CONFIRMAR POR WHATSAPP 🍔
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-panel">
+        <div class="max-w-md mx-auto py-10">
+            <h2 class="text-2xl font-bold text-amber-500 mb-6">Administración</h2>
+            <div class="space-y-6">
+                <div class="bg-white/5 p-4 rounded-2xl">
+                    <label class="block text-xs text-gray-400 mb-1 uppercase">Precio Base ($)</label>
+                    <input type="number" id="admin-base-price" step="0.1" class="w-full bg-slate-800 p-3 rounded-xl text-white">
+                </div>
+                <div id="admin-extras-list" class="space-y-2"></div>
+                <button onclick="saveAdminChanges()" class="w-full bg-amber-500 py-4 rounded-2xl font-black text-slate-900">GUARDAR CAMBIOS</button>
+                <button onclick="closeAdmin()" class="w-full text-white/50 text-sm">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-6 right-6 z-50">
+        <button onclick="toggleCart()" class="bg-amber-500 p-4 rounded-full shadow-2xl relative active:scale-95 transition">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <span id="cart-count" class="cart-badge">0</span>
+        </button>
+    </div>
+
+    <main class="max-w-md mx-auto px-5 pt-6 opacity-0 transition-opacity duration-1000" id="main-content">
+        <header class="mb-8">
+            <h2 class="text-2xl font-black text-white leading-none cursor-pointer select-none inline-block" ondblclick="askAdminPass()">BRASILIA 2</h2>
+            <p class="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-1">Sabor Casero</p>
+        </header>
+
+        <div class="burger-card p-5 rounded-[2.5rem] shadow-2xl relative">
+            <div class="relative mb-8">
+                <img src="hamburguesa1.jpg" alt="Hamburguesa Especial" class="burger-image shadow-2xl">
+                <div class="absolute -bottom-4 right-4 bg-amber-500 text-white font-black px-6 py-3 rounded-2xl shadow-xl text-xl floating-badge">
+                    $3.00
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h3 class="text-2xl font-bold">Hamburguesa Especial</h3>
+                <p class="text-gray-400 text-xs mt-1 px-4">Carne artesanal, pan suave y el toque secreto de la casa.</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Personaliza (Gratis) -->
+                <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                    <p class="text-[11px] font-black text-amber-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        Personaliza (Gratis) ✨
+                    </p>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase mb-3">Ingredientes Base:</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-amber-400 transition" onclick="handleToggle(this, '🧀')">
+                            <input type="checkbox" class="option-checkbox base-ingredient" value="Queso" checked> 
+                            <span>Queso 🧀</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-amber-400 transition" onclick="handleToggle(this, '🧅')">
+                            <input type="checkbox" class="option-checkbox base-ingredient" value="Cebolla" checked> 
+                            <span>Cebolla 🧅</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-amber-400 transition" onclick="handleToggle(this, '🍅')">
+                            <input type="checkbox" class="option-checkbox base-ingredient" value="Tomate" checked> 
+                            <span>Tomate 🍅</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-xs cursor-pointer hover:text-amber-400 transition" onclick="handleToggle(this, '🥬')">
+                            <input type="checkbox" class="option-checkbox base-ingredient" value="Lechuga" checked> 
+                            <span>Lechuga 🥬</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Salsas -->
+                <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                    <p class="text-[11px] font-black text-amber-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        Salsas (Opcional) 🧴
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2 text-[10px] cursor-pointer" onclick="handleToggle(this, '⚪')"><input type="checkbox" class="option-checkbox condiment-option" value="Mayonesa" checked> Mayonesa ⚪</label>
+                        <label class="flex items-center gap-2 text-[10px] cursor-pointer" onclick="handleToggle(this, '🔴')"><input type="checkbox" class="option-checkbox condiment-option" value="Salsa Tomate" checked> S. Tomate 🔴</label>
+                        <label class="flex items-center gap-2 text-[10px] cursor-pointer" onclick="handleToggle(this, '🟡')"><input type="checkbox" class="option-checkbox condiment-option" value="Mostaza" checked> Mostaza 🟡</label>
+                        <label class="flex items-center gap-2 text-[10px] font-bold text-red-400 cursor-pointer" onclick="handleToggle(this, '🔥')"><input type="checkbox" class="option-checkbox condiment-option" value="Ají"> ¡Ají! 🌶️</label>
+                    </div>
+                </div>
+
+                <!-- Complementos -->
+                <div class="space-y-3">
+                    <p class="text-[11px] font-black text-amber-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                        Complementa tu pedido ➕
+                    </p>
+                    <div id="extras-container" class="space-y-2">
+                        <!-- Inyectado dinámicamente -->
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <div class="flex justify-between items-center mb-4 px-2">
+                        <span class="text-gray-400 font-bold text-xs uppercase tracking-widest">Subtotal</span>
+                        <span class="text-3xl font-black text-white" id="total-display">$3.00</span>
+                    </div>
+                    <button onclick="addToCart()" class="btn-primary w-full py-5 rounded-2xl font-black text-white text-lg active:scale-95 transition shadow-lg">
+                        AÑADIR AL CARRITO 🛒
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 text-center pb-12">
+            <p class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">
+                Próximamente: Papas fritas naturales 🥔
+            </p>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        
+        const firebaseConfig = { projectId: "brasilia-2" }; 
+        
+        let appState = {
+            basePrice: 3.0,
+            inventory: [
+                { id: 'combo', label: "Papas Snack + Cola", subtitle: "Papas de funda", price: 1.0, emoji: '🍟', available: true },
+                { id: 'huevo', label: "Huevo Frito", subtitle: "", price: 1.0, emoji: '🍳', available: true },
+                { id: 'doble', label: "Otra Carne (Doble)", subtitle: "", price: 2.0, emoji: '🥩', available: true },
+                { id: 'jamon', label: "Jamón", subtitle: "", price: 1.0, emoji: '🍖', available: true },
+                { id: 'tocino', label: "Tocino", subtitle: "", price: 1.0, emoji: '🥓', available: true }
+            ]
+        };
+
+        let cart = [];
+
+        function renderUI() {
+            const container = document.getElementById('extras-container');
+            container.innerHTML = '';
+            appState.inventory.forEach(extra => {
+                if(!extra.available) return;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition cursor-pointer" onclick="handleToggle(this, '${extra.emoji}')">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" class="option-checkbox extra-cost" data-price="${extra.price}" data-label="${extra.label}">
+                            <div>
+                                <span class="text-sm font-bold block leading-none text-white">${extra.label} ${extra.emoji}</span>
+                                ${extra.subtitle ? `<span class="text-[9px] text-gray-500 uppercase font-bold">${extra.subtitle}</span>` : ''}
+                            </div>
+                        </div>
+                        <span class="text-amber-500 font-bold text-sm">+$${extra.price.toFixed(2)}</span>
+                    </div>`;
+            });
+            updateTotal();
+        }
+
+        window.handleToggle = function(el, emoji) {
+            const cb = el.querySelector('input');
+            cb.checked = !cb.checked;
+            updateTotal();
+
+            if (cb.checked) {
+                const rect = el.getBoundingClientRect();
+                const emojiEl = document.createElement('div');
+                emojiEl.className = 'floating-emoji';
+                emojiEl.innerText = emoji;
+                emojiEl.style.left = `${rect.left + rect.width/2}px`;
+                emojiEl.style.top = `${rect.top}px`;
+                document.body.appendChild(emojiEl);
+                setTimeout(() => emojiEl.remove(), 800);
+            }
+        };
+
+        window.updateTotal = function() {
+            let val = appState.basePrice;
+            document.querySelectorAll('.extra-cost:checked').forEach(ex => val += parseFloat(ex.dataset.price));
+            document.getElementById('total-display').innerText = `$${val.toFixed(2)}`;
+        };
+
+        window.addToCart = function() {
+            const baseIngredients = Array.from(document.querySelectorAll('.base-ingredient:checked')).map(i => i.value);
+            const condiments = Array.from(document.querySelectorAll('.condiment-option:checked')).map(c => c.value);
+            const extras = Array.from(document.querySelectorAll('.extra-cost:checked')).map(ex => ex.dataset.label);
+            
+            cart.push({
+                name: "Hamburguesa Especial",
+                total: parseFloat(document.getElementById('total-display').innerText.replace('$','')),
+                details: `Base: ${baseIngredients.join(', ')} | Salsas: ${condiments.join(', ')}`,
+                extras: extras
+            });
+            
+            document.getElementById('cart-count').innerText = cart.length;
+            renderCart();
+            document.querySelectorAll('.extra-cost').forEach(c => c.checked = false);
+            updateTotal();
+        };
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+            let totalFactura = 0;
+            cart.forEach((item, i) => {
+                totalFactura += item.total;
+                container.innerHTML += `
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/10 mb-2">
+                        <div class="flex justify-between font-bold text-white text-sm">
+                            <span>${item.name}</span>
+                            <span>$${item.total.toFixed(2)}</span>
+                        </div>
+                        <p class="text-[9px] text-gray-400 mt-1">${item.details}</p>
+                        ${item.extras.length > 0 ? `<p class="text-[9px] text-amber-500 mt-1 font-bold">+ ${item.extras.join(', ')}</p>` : ''}
+                        <button onclick="remove(${i})" class="text-[9px] text-red-400 mt-2 uppercase font-bold tracking-widest">Eliminar</button>
+                    </div>`;
+            });
+            document.getElementById('cart-total-display').innerText = `$${totalFactura.toFixed(2)}`;
+        }
+
+        window.remove = (i) => { cart.splice(i, 1); renderCart(); document.getElementById('cart-count').innerText = cart.length; };
+        window.toggleCart = () => { const p = document.getElementById('cart-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; };
+        
+        window.askAdminPass = () => { if(prompt("Pass:") === "B2") document.getElementById('admin-panel').style.display='block'; };
+        window.closeAdmin = () => document.getElementById('admin-panel').style.display='none';
+
+        window.sendOrder = () => {
+            const c = document.getElementById('casa').value;
+            const n = document.getElementById('nombre').value;
+            if(!c || !n) return alert("Faltan datos");
+            let msg = `*BRASILIA 2*%0A*Cliente:* ${n} (Casa ${c})%0A%0A`;
+            cart.forEach(i => msg += `*1x ${i.name}* ($${i.total.toFixed(2)})%0A- ${i.details}%0A  Extras: ${i.extras.join(', ') || 'Ninguno'}%0A%0A`);
+            msg += `*TOTAL: ${document.getElementById('cart-total-display').innerText}*`;
+            window.location.href = `https://wa.me/593939406913?text=${msg}`;
+        };
+
+        renderUI();
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('welcome-screen').classList.add('fade-out');
+                document.getElementById('main-content').classList.remove('opacity-0');
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
