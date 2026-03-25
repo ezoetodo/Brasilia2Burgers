@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brasilia 2 - Hamburguesas</title>
+    <title>Zoe Burgers - Brasilia 2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -53,11 +53,12 @@
             color: white;
             text-shadow: 2px 4px 12px rgba(0,0,0,0.3);
             animation: pulseWelcome 1.5s infinite ease-in-out;
+            line-height: 1;
         }
 
         @keyframes pulseWelcome {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 0.9; }
         }
 
         .fade-out { opacity: 0; visibility: hidden; }
@@ -166,9 +167,10 @@
         Entrega gratis en el conjunto 🏠
     </div>
 
+    <!-- Pantalla de Bienvenida -->
     <div id="welcome-screen">
-        <h1 class="welcome-text text-center">Brasilia 2</h1>
-        <p class="text-white/80 font-medium mt-2">Sabor Casero</p>
+        <h1 class="welcome-text text-center">Zoe Burgers</h1>
+        <p class="text-white/80 font-black mt-2 tracking-[0.2em] uppercase text-sm">Buen Provecho</p>
     </div>
 
     <!-- Panel del Carrito -->
@@ -235,8 +237,8 @@
 
     <main class="max-w-md mx-auto px-5 pt-6 opacity-0 transition-opacity duration-1000" id="main-content">
         <header class="mb-8">
-            <h2 class="text-2xl font-black text-white leading-none cursor-pointer select-none inline-block" ondblclick="askAdminPass()">BRASILIA 2</h2>
-            <p class="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-1">Sabor Casero</p>
+            <h2 class="text-2xl font-black text-white leading-none cursor-pointer select-none inline-block" ondblclick="askAdminPass()">ZOE BURGERS</h2>
+            <p class="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-1">Exclusivo para Brasilia 2</p>
         </header>
 
         <!-- Card de Hamburguesa -->
@@ -250,7 +252,7 @@
 
             <div class="text-center mb-8">
                 <h3 class="text-2xl font-bold">Hamburguesa Especial</h3>
-                <p class="text-gray-400 text-xs mt-1 px-4">Carne artesanal, pan suave y el toque secreto de la casa.</p>
+                <p class="text-gray-400 text-xs mt-1 px-4">Carne artesanal, pan suave y el toque secreto de Zoe Burgers.</p>
             </div>
 
             <div class="space-y-6">
@@ -432,7 +434,6 @@
             const isOpen = p.style.display === 'block';
             p.style.display = isOpen ? 'none' : 'block';
             
-            // Bloquear scroll
             if (!isOpen) {
                 document.body.classList.add('stop-scroll');
             } else {
@@ -460,7 +461,7 @@
             if(!c || !n) return alert("Por favor, ingresa tu Nombre y Número de Casa");
             if(cart.length === 0) return alert("El carrito está vacío");
 
-            let msg = `🍔 *NUEVO PEDIDO - BRASILIA 2*%0A`;
+            let msg = `🍔 *NUEVO PEDIDO - ZOE BURGERS*%0A`;
             msg += `*Nombre:* ${n}%0A`;
             msg += `*Casa:* ${c}%0A%0A`;
             msg += `Me gustaría una especial con:%0A`;
@@ -495,7 +496,7 @@
             setTimeout(() => {
                 document.getElementById('welcome-screen').classList.add('fade-out');
                 document.getElementById('main-content').classList.remove('opacity-0');
-            }, 1500);
+            }, 1800); // Un poco más de tiempo para apreciar el Buen Provecho
         });
     </script>
 </body>
